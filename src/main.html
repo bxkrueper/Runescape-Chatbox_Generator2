@@ -1,0 +1,146 @@
+<!doctype html>
+
+<html>
+<head>
+<style>
+.center {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+}
+</style>
+</head>
+
+<body>
+<h1 class="center">Runescape Chatbox Generator</h1>
+
+<hr />
+
+<div id=input_div class="center">
+	<div id=input>
+		<div class="center">
+		
+		
+			<input type="text" id="chatHeadNameSelect" list="chatheadList" placeholder="search for a chathead" onchange="somethingSelected()">
+			<datalist id="chatheadList">
+			</datalist>
+		
+			
+		</div>
+		<div>
+			<img id="chatHead" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" width="100" height="100"/>
+			<span id=quoteInput>
+				<textarea id="quote_text_area" rows="4" cols="50" placeholder="Your quote here" autofocus="autofocus"></textarea>
+			</span>
+		</div>
+	</div>
+	
+</div>
+
+
+
+<div class="center">
+	<input type="button" value="Generate!" onClick="generateChatBoxPic()" />
+</div>
+
+
+
+<div class="center">
+	<img id="baseImageDummy" src="../images/blank_box.png" width="0" height="0"/>
+	<canvas id="myCanvas"></canvas>
+</div>
+
+
+
+<script type="text/javascript" src="textWrapper.js"></script>
+<script type="text/javascript" src="chatHeadDatabase.js"></script>
+<script src="jquery.js"></script>
+<script type="text/javascript">
+	var baseImage;
+	var maxColumns = 50;
+	var maxRows = 4;
+	
+	
+	var currentChatHead;
+	
+	//ideas: name download
+	//preview pic scale width
+	//make website look nice, display image scales, instructions (copy or save the image), center
+	//bigger selection
+	//upload your own
+	
+	function somethingSelected(){
+		//set currentChatHead. this will be "undefined" if no options are available
+		var chatHeadNameSelect = document.getElementById("chatHeadNameSelect");
+		currentChatHead = chatHeadNameSelect.value;
+		if (!(currentChatHead in chatHeads)) {//if the text does not match a chathead name in the database
+			currentChatHead = undefined;
+		}
+		
+		updateChatHeadPicture();
+	}
+	
+	
+	
+	function updateChatHeadPicture(){
+		var picElement = document.getElementById("chatHead");
+		if (currentChatHead === undefined) {
+			picElement.src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";/////clear picture by setting src to useless image
+		}else{
+			picElement.src = chatHeads[currentChatHead].picture;
+		}
+	}
+	
+
+	function generateChatBoxPic(){
+		var canvas = document.getElementById("myCanvas");
+		var context = canvas.getContext("2d");
+		
+		//get info
+		var quote = document.getElementById("quote_text_area").value;
+		var charName;
+		if (currentChatHead === undefined) {
+			charName = "";
+		}else{
+			charName = chatHeads[currentChatHead].characterName;
+		}
+		var charPic = document.getElementById("chatHead");
+		
+		drawAllChatboxes(quote,charName,charPic,canvas,context);
+	}
+	
+	
+	
+	
+	function loadInitial(){
+		//image needs to be loaded or it won't draw the first time
+		baseImage = new Image();
+		baseImage.src = "../images/blank_box.png";
+		
+		//fill the select box
+		var chatheadList = document.getElementById("chatheadList");
+		for(chatHeadName in chatHeads){
+			var option = document.createElement("option");
+			option.value = chatHeadName;
+			chatheadList.appendChild(option);
+		}
+		//generate a empty chatbox after the dummy image with the picture loads
+		document.getElementById("baseImageDummy").onload = generateChatBoxPic();
+		
+		//auto scale chatbox head image
+		$("#chatHead").on('load',function() {
+			var height = 100;
+			var width = this.naturalWidth * height/this.naturalHeight;
+			console.log("natWidth: " + this.naturalWidth + "natHeight: " + this.naturalHeight + "width: " + width);
+			this.width = String(width);
+			//alert($(this).width());
+		});
+	}
+	window.onload = loadInitial;
+	
+	
+</script>
+
+</body>
+
+</html>
