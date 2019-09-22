@@ -1,1 +1,1 @@
-# Runescape-Chatbox_Generator2
+open src/main.html to try it out
