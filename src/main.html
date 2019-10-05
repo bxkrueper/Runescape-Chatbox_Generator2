@@ -17,105 +17,303 @@
 <hr />
 
 <div id=input_div class="center">
-	<div id=input>
-		<div class="center">
+
+	<div id="selectionTypeDiv">
+		<input type="radio" class = "selectRadio" data-divid="databaseSelectDiv" data-info-src="database" name="selectionType" value="database" checked> From Selection
+		<input type="radio" class = "selectRadio" data-divid="playerSelectDiv" data-info-src="username" name="selectionType" value="playerName"> Player Username
+		<input type="radio" class = "selectRadio" data-divid="customSelectDiv" data-info-src="custom" name="selectionType" value="custom"> Custom
+	</div>
+
+	<div id="selectionContainer">
+		<div id = "databaseSelectDiv" class="center">
 		
-		
-			<input type="text" id="chatHeadNameSelect" list="chatheadList" placeholder="search for a chathead" onchange="somethingSelected()">
+			<input type="text" id="chatHeadNameSelect" list="chatheadList" placeholder="search for a chathead" onchange="updateFromDatabase()" onClick="this.select();">
 			<datalist id="chatheadList">
 			</datalist>
 		
+		</div>
+
+		<div id = "playerSelectDiv" class="center" style="display: none;">
+		
+			<input type="text" id="playerNameInput" placeholder="enter a player username" onchange="updateFromUsername()">
 			
 		</div>
-		<div>
-			<img id="chatHead" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" width="100" height="100"/>
-			<span id=quoteInput>
-				<textarea id="quote_text_area" rows="4" cols="50" placeholder="Your quote here" autofocus="autofocus"></textarea>
-			</span>
+
+		<div id = "customSelectDiv" class="center" style="display: none;">
+
+			<input type="text" id="customNameInput" placeholder="Name" onchange="updateFromCustom()">
+
+			<input type="file" id="real-file" hidden="hidden" onchange="updateFromCustom.call(this)"/>
+			<button type="button" id="custom-button">choose a file</button>
+			<span id="custom-text"> no file chosen, yet.</span>
+
 		</div>
 	</div>
+
+	<div id="orientationDiv">
+		<input type="radio" name="orientationRadios" value="left" checked> Left
+		<input type="radio" name="orientationRadios" value="none"> No Chathead
+		<input type="radio" name="orientationRadios" value="right"> Right
+	</div>
+
+	<div id="previewDiv">
+		<img id="chatHead" src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" width="100" height="100"/>
+		<p id="namePreview" rows="1" cols="50"></p>
+	</div>
+
+	<span id=quoteInput>
+			<textarea id="quote_text_area" rows="4" cols="50" placeholder="Your quote here" autofocus="autofocus"></textarea>
+	</span>
 	
 </div>
 
 
 
 <div class="center">
-	<input type="button" value="Generate!" onClick="generateChatBoxPic()" />
+	<input type="button" value="Clear" onClick="clearAllChatBoxesMain()" />
+	<input type="button" value="Delete" onClick="deleteLastChatboxMain()" />
+	<input id = "addToButton" type="button" value="Add To" onClick="addToConversationMain()" data-button-info-src="database" />
 </div>
 
 
 
 <div class="center">
-	<img id="baseImageDummy" src="../images/blank_box.png" width="0" height="0"/>
 	<canvas id="myCanvas"></canvas>
 </div>
 
 
 
-<script type="text/javascript" src="textWrapper.js"></script>
+
+
+
+<script type="text/javascript" src="conversation.js"></script>
+<script type="text/javascript" src="chatboxDrawer.js"></script>
 <script type="text/javascript" src="chatHeadDatabase.js"></script>
 <script src="jquery.js"></script>
 <script type="text/javascript">
-	var baseImage;
+	var baseImageLeft;
+	var baseImageRight;
 	var maxColumns = 50;
 	var maxRows = 4;
 	
-	
-	var currentChatHead;
-	
-	//ideas: name download
-	//preview pic scale width
+	//ideas:
 	//make website look nice, display image scales, instructions (copy or save the image), center
-	//bigger selection
+	//bigger database selection
 	//upload your own
+	//player chatheads
+	//add/delete/clear buttons instead of generate
 	
-	function somethingSelected(){
-		//set currentChatHead. this will be "undefined" if no options are available
+	//then update the chat head pic
+	function updateFromDatabase(){
 		var chatHeadNameSelect = document.getElementById("chatHeadNameSelect");
-		currentChatHead = chatHeadNameSelect.value;
-		if (!(currentChatHead in chatHeads)) {//if the text does not match a chathead name in the database
-			currentChatHead = undefined;
-		}
 		
-		updateChatHeadPicture();
-	}
-	
-	
-	
-	function updateChatHeadPicture(){
+		//update preview name
+		document.getElementById("namePreview").innerHTML = chatHeadNameSelect.value;
+
+		//update preview pic
 		var picElement = document.getElementById("chatHead");
-		if (currentChatHead === undefined) {
-			picElement.src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";/////clear picture by setting src to useless image
-		}else{
+		var currentChatHead = chatHeadNameSelect.value;
+		if (currentChatHead in chatHeads) {
 			picElement.src = chatHeads[currentChatHead].picture;
+		}else{
+			picElement.src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";/////clear picture by setting src to useless image
 		}
+
 	}
+
+	function updateFromUsername(){
+		const urlStart = "https://apps.runescape.com/runemetrics/app/overview/player/";
+		//const imgClassName = "profile-block__image";
+
+		const playerPicStart = "https://secure.runescape.com/m=avatar-rs/";
+		var username = document.getElementById("playerNameInput").value;
+		const playerPicEnd = "/chat.png";
+		var picUrl = playerPicStart + username + playerPicEnd;
+
+		
+		//update preview name
+		document.getElementById("namePreview").innerHTML = username;
+
+		document.getElementById("chatHead").src = "../images/default_chat.png";
+
+		
+
+		// var myFunction = function(xml){
+		// 	var xmlDoc = xml.responseXML;
+
+		// }
+
+		// var xhttp = new XMLHttpRequest();
+		// xhttp.onreadystatechange = function() {
+		//     if (this.readyState == 4 && this.status == 200) {
+		//     	console.log(this.responseText);
+		//         myFunction(this);
+		//     }
+		// };
+		// xhttp.open("GET", picUrl, true);
+		// xhttp.send();
+
+
+		//try:  cross-domain request
+		// var invocation = new XMLHttpRequest();
+	}
+
+	function updateFromCustom(){
+		//update preview name
+		document.getElementById("namePreview").innerHTML = document.getElementById("customNameInput").value;
+
+		//update image src
+		if(this.files && this.files[0]){
+			var obj = new FileReader();
+			obj.onload = function(data){
+				var image = document.getElementById("chatHead");
+				image.src = data.target.result;
+				image.style.display = "block";
+			}
+			obj.readAsDataURL(this.files[0]);
+		}
+
+
+		//document.getElementById("chatHead").src = document.getElementById("real-file").value;
+	}
+	
 	
 
-	function generateChatBoxPic(){
+
+
+
+
+
+	function clearAllChatBoxesMain(){
+		var canvas = document.getElementById("myCanvas");
+		var context = canvas.getContext("2d");
+		clearAllChatBoxes(canvas,context);
+	}
+
+	function deleteLastChatboxMain(){
+		var canvas = document.getElementById("myCanvas");
+		var context = canvas.getContext("2d");
+		deleteLastChatbox(canvas,context);
+	}
+
+	function addToConversationMain(){
 		var canvas = document.getElementById("myCanvas");
 		var context = canvas.getContext("2d");
 		
 		//get info
-		var quote = document.getElementById("quote_text_area").value;
-		var charName;
-		if (currentChatHead === undefined) {
-			charName = "";
-		}else{
-			charName = chatHeads[currentChatHead].characterName;
+		var dataSourceStr = $("#addToButton").attr('data-button-info-src');
+		var infoFunction;
+		switch(dataSourceStr){
+			case "database":
+				infoFunction = getInfoFromDatabase;
+				break;
+			case "username":
+				infoFunction = getInfoFromPlayername;
+				break;
+			case "custom":
+				infoFunction = getInfoFromCustom;
+				break;
+
 		}
-		var charPic = document.getElementById("chatHead");
 		
-		drawAllChatboxes(quote,charName,charPic,canvas,context);
+		//var quoteInfo = getInfoFromDatabase();
+		var quoteInfo = infoFunction();
+
+		
+		addToChatboxConversation(quoteInfo.name,quoteInfo.picture,quoteInfo.orientation,quoteInfo.quote);
+		generateChatboxConversation(canvas,context);
+	}
+
+
+	//returns {name,picture,orientation,quote}
+	function getInfoFromDatabase(){
+		//name
+		var charName;
+		var currentChatHead = chatHeadNameSelect.value;
+		if (currentChatHead in chatHeads) {//if the text matches a chathead name in the database
+			charName = chatHeads[currentChatHead].characterName;
+		}else{
+			charName = "";
+		}
+
+		//image
+		var charPic = new Image();
+		charPic.src  = document.getElementById("chatHead").src;
+
+
+		//quote
+		var charQuote = document.getElementById("quote_text_area").value;
+
+
+
+		var quoteInfo = {name:charName,picture:charPic,orientation:getSelectedOrientation(),quote:charQuote};
+
+		return quoteInfo;
+	}
+	//returns {name,picture,orientation,quote}
+	function getInfoFromPlayername(){
+		//name
+		var charName = document.getElementById("namePreview").innerHTML;
+
+		//image
+		var charPic = new Image();
+		charPic.src  = document.getElementById("chatHead").src;
+
+		//quote
+		var charQuote = document.getElementById("quote_text_area").value;
+
+		var quoteInfo = {name:charName,picture:charPic,orientation:getSelectedOrientation(),quote:charQuote};
+
+		return quoteInfo;
+	}
+	//returns {name,picture,orientation,quote}
+	function getInfoFromCustom(){
+		//name
+		var charName = document.getElementById("namePreview").innerHTML;
+
+		//image
+		var charPic = new Image();
+		charPic.src  = document.getElementById("chatHead").src;
+
+		//quote
+		var charQuote = document.getElementById("quote_text_area").value;
+
+		var quoteInfo = {name:charName,picture:charPic,orientation:getSelectedOrientation(),quote:charQuote};
+
+		return quoteInfo;
+	}
+
+
+	function getSelectedOrientation(){
+		var orientationRadios = document.getElementsByName('orientationRadios');
+		var boxOrientation;
+		for (var i = 0, length = orientationRadios.length; i < length; i++)
+		{
+			if (orientationRadios[i].checked)
+			{
+			 	boxOrientation = orientationRadios[i].value;
+			 	break;
+			}
+		}
+		return boxOrientation;
 	}
 	
+
+
+
+
+
 	
 	
-	
-	function loadInitial(){
+	$(document).ready(function(){
+
 		//image needs to be loaded or it won't draw the first time
 		baseImage = new Image();
 		baseImage.src = "../images/blank_box.png";
+		circleLeft = new Image();
+		circleLeft.src = "../images/left_circle.png";
+		circleRight = new Image();
+		circleRight.src = "../images/right_circle.png";
 		
 		//fill the select box
 		var chatheadList = document.getElementById("chatheadList");
@@ -124,19 +322,34 @@
 			option.value = chatHeadName;
 			chatheadList.appendChild(option);
 		}
-		//generate a empty chatbox after the dummy image with the picture loads
-		document.getElementById("baseImageDummy").onload = generateChatBoxPic();
+
+		clearAllChatBoxesMain();
 		
-		//auto scale chatbox head image
+		//auto scale chatbox head image to the correct width whenever the picture changes
 		$("#chatHead").on('load',function() {
 			var height = 100;
 			var width = this.naturalWidth * height/this.naturalHeight;
 			console.log("natWidth: " + this.naturalWidth + "natHeight: " + this.naturalHeight + "width: " + width);
 			this.width = String(width);
-			//alert($(this).width());
 		});
-	}
-	window.onload = loadInitial;
+
+  		$(".selectRadio").on('click',function(){
+  			//hide siblings, show right input div
+			var activeDivId = $(this).attr('data-divid');
+			var activeDiv = $('#' + activeDivId);
+			activeDiv.siblings().slideUp();
+			activeDiv.slideDown();
+
+			$("#addToButton").attr('data-button-info-src',$(this).attr('data-info-src'));//give addToButton a string describing which function to use for getting info
+			//change the value of an attribute (don't use =)
+
+		});
+
+		$("#custom-button").on('click',function() {
+			$("#real-file").click();
+		});
+
+	});
 	
 	
 </script>
