@@ -11,7 +11,7 @@
 </style>
 </head>
 
-<body>
+<body onload = 'load()'>
 <h1 class="center">Runescape Chatbox Generator</h1>
 
 <hr />
@@ -89,7 +89,6 @@
 <script type="text/javascript" src="conversation.js"></script>
 <script type="text/javascript" src="chatboxDrawer.js"></script>
 <script type="text/javascript" src="chatHeadDatabase.js"></script>
-<script src="jquery.js"></script>
 <script type="text/javascript">
 	var baseImageLeft;
 	var baseImageRight;
@@ -201,7 +200,7 @@
 		var context = canvas.getContext("2d");
 		
 		//get info
-		var dataSourceStr = $("#addToButton").attr('data-button-info-src');
+		var dataSourceStr = document.getElementById("addToButton").getAttribute('data-button-info-src');
 		var infoFunction;
 		switch(dataSourceStr){
 			case "database":
@@ -305,7 +304,7 @@
 
 	
 	
-	$(document).ready(function(){
+	function load(){
 
 		//image needs to be loaded or it won't draw the first time
 		baseImage = new Image();
@@ -326,30 +325,55 @@
 		clearAllChatBoxesMain();
 		
 		//auto scale chatbox head image to the correct width whenever the picture changes
-		$("#chatHead").on('load',function() {
+		document.getElementById("chatHead").onload = function() {
 			var height = 100;
 			var width = this.naturalWidth * height/this.naturalHeight;
 			console.log("natWidth: " + this.naturalWidth + "natHeight: " + this.naturalHeight + "width: " + width);
 			this.width = String(width);
-		});
+		};
 
-  		$(".selectRadio").on('click',function(){
-  			//hide siblings, show right input div
-			var activeDivId = $(this).attr('data-divid');
-			var activeDiv = $('#' + activeDivId);
-			activeDiv.siblings().slideUp();
-			activeDiv.slideDown();
+		let selectRadios = document.querySelectorAll('.selectRadio');
+		for(let i=0;i<selectRadios.length;i++){
+			let selectRadio = selectRadios[i];
+			selectRadio.onclick = function(){
+				//hide siblings, show right input div
+				var activeDivId = selectRadio.getAttribute('data-divid');
+				var activeDiv = document.getElementById(activeDivId);
+				[...activeDiv.parentElement.children].forEach(sib => {
+				    if (sib === activeDiv) {
+				        sib.style.display = 'block';
+				    }else{
+				    	sib.style.display = 'none';
+				    }
+				});
+				// activeDiv.siblings().slideUp();
+				// activeDiv.slideDown();
 
-			$("#addToButton").attr('data-button-info-src',$(this).attr('data-info-src'));//give addToButton a string describing which function to use for getting info
-			//change the value of an attribute (don't use =)
+				document.getElementById("addToButton").setAttribute('data-button-info-src',selectRadio.getAttribute('data-info-src'));//give addToButton a string describing which function to use for getting info
+			};
+		}
 
-		});
 
-		$("#custom-button").on('click',function() {
-			$("#real-file").click();
-		});
 
-	});
+
+
+  	// 	$(".selectRadio").on('click',function(){
+  	// 		//hide siblings, show right input div
+		// 	var activeDivId = $(this).attr('data-divid');
+		// 	var activeDiv = $('#' + activeDivId);
+		// 	activeDiv.siblings().slideUp();
+		// 	activeDiv.slideDown();
+
+		// 	$("#addToButton").attr('data-button-info-src',$(this).attr('data-info-src'));//give addToButton a string describing which function to use for getting info
+		// 	//change the value of an attribute (don't use =)
+
+		// });
+
+		document.getElementById("custom-button").onclick = function() {
+			document.getElementById("real-file").click();
+		};
+
+	}
 	
 	
 </script>
